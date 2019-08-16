@@ -17,4 +17,4 @@ fi
 #   Example: docker run centos:7 uname -a
 #            container_exec centos:7 uname -a
 
-container_exec ${CONTAINER_IMAGE} echo "$(find / -name 'find_space.py'  2>&1 | grep -v 'Permission denied')"
+container_exec ${CONTAINER_IMAGE} ls
