@@ -17,4 +17,4 @@ fi
 #   Example: docker run centos:7 uname -a
 #            container_exec centos:7 uname -a
 
-container_exec ${CONTAINER_IMAGE}
+container_exec ${CONTAINER_IMAGE} pwd
