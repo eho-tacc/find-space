@@ -1,4 +1,5 @@
-FROM enho/protpy:0.1.1
+FROM sd2e/python3:ubuntu18
+LABEL maintainer="eho@tacc.utexas.edu"
 
 ### DO NOT EDIT BELOW ###
 # Install software to make containers interactive
@@ -35,7 +36,21 @@ ENV _USER_WORK=
 
 # Customize your Docker container starting here
 
-# ENV PATH "/opt/bin/:$PATH"
-# ADD config.yml /config.yml
-# ADD src /opt/src
+USER root
+RUN apt-get -y update && \
+    apt-get -y install python3.6-dev
+RUN pip3 install numpy \
+                 scipy \
+                 cython
 
+# install ProtPy
+RUN pip3 install --index-url https://test.pypi.org/simple/ protpy
+
+ARG SRC="/opt/find-space/src"
+ARG WD="/home/work"
+RUN mkdir -p $SRC $WD && \
+    cd $WD && \
+    mkdir -p out scan log
+COPY src $SRC
+
+CMD ["python3", "/opt/find-space/src/find_space.py"]
