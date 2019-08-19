@@ -54,5 +54,5 @@ RUN mkdir -p $SRC $WD && \
     echo 1crn > pdb_screen_list.txt
 COPY src $SRC
 
-CMD "bash"
-#CMD ["python3", "/opt/find-space/src/find_space.py", "-w /home/work -p /home/work/pdb_screen_list.txt"]
+#CMD "bash"
+CMD python3 /opt/find-space/src/find_space.py -w /home/work -p /home/work/pdb_screen_list.txt -l /home/work/log/fs_log.txt
