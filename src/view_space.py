@@ -1,6 +1,6 @@
 # !/usr/bin/env
 
-'''
+"""
 **********************************************************
 ********************** CHANGE LOG ************************
 **********************************************************
@@ -11,17 +11,17 @@
     find_space.py and converts B-factors of pseudoatoms to
     the sphere_scale attribute in Pymol. This allows for
     scaled visualization of empty space in the structure.
-'''
+"""
 
 def vdwToB(ID,b,vdw_max=3):
-    '''
+    """
     Sets VDW radius to the B-factor for atom with ID.
 
     Arguments:
         int ID - ID number of atom to alter
         float b - B factor of the atom
         float vdw_max - maximum shown size of VDW radius
-    '''
+    """
 
     # Limit VDW radius so spheres don't explode
     if b > vdw_max:
@@ -33,9 +33,9 @@ def vdwToB(ID,b,vdw_max=3):
 # end function test_func
 
 def main_handler():
-    '''
+    """
     Main handling function for view_space.py.
-    '''
+    """
 
     cmd.select("pixels","chain X")
     cmd.select("prot","not pixels")

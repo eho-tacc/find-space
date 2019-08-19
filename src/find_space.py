@@ -5,6 +5,7 @@ import os
 import time
 import sys
 import numpy as np
+import argparse
 
 # ProtPy dependencies
 import protpy
@@ -12,153 +13,191 @@ from protpy import geom
 from protpy.void import VStruct
 #from electrostatic_potential_solver import ElectrostaticPotentialSolver
 
-'''
-*********************************************************
-**************** USER-DEFINED PARAMETERS ****************
-*********************************************************
-'''
+def set_defaults():
+    """
+    *********************************************************
+    **************** USER-DEFINED PARAMETERS ****************
+    *********************************************************
+    """
 
-# Defines the base directory. FindSpace should automatically
-# retrieve this, but I'm keeping it in User Defined Parameters
-# in case one wanted more manual control. Ensures that all
-# file paths reference from find_space.py, not from the caller's
-# working directory.
-base_dir = "./" + os.path.join(os.path.dirname(__file__), '')
+    # Defines the base directory. FindSpace should automatically
+    # retrieve this, but I'm keeping it in User Defined Parameters
+    # in case one wanted more manual control. Ensures that all
+    # file paths reference from find_space.py, not from the caller's
+    # working directory.
+    work_dir = "./" + os.path.join(os.path.dirname(__file__), '')
 
-# Location of out and scan subdirectories (need to end in '/').
-# FindSpace will download all .pdb files it screens to scan_dir.
-# All found void spaces are stored in directories named by PDB code
-# in out_dir.
-scan_dir = base_dir + "scan/"
-out_dir = base_dir + "out/"
+    # Location of out and scan subdirectories (need to end in '/').
+    # FindSpace will download all .pdb files it screens to scan_dir.
+    # All found void spaces are stored in directories named by PDB code
+    # in out_dir.
+    scan_dir = work_dir + "scan/"
+    out_dir = work_dir + "out/"
 
-# File path of pdb screen list, the file from which to
-# read PDB codes to be screened.
-pdb_screen_list = base_dir + "pdb_screen_list.txt"
+    # File path of pdb screen list, the file from which to
+    # read PDB codes to be screened.
+    pdb_screen_list = work_dir + "pdb_screen_list.txt"
 
-# Determines where to get PDB screen codes from.
-# Uncomment only one of the following lines. Tab-
-# delim will source PDB codes from the first column
-# of a tab delimited .txt file. Plain .txt will source
-# from a txt file containing a list of PDB codes
-# separated by newlines (\n). RCSB will look up the
-# current list of all PDB codes and sort them
-# alphabetically.
-# pdb_list_from = "tab_delim"
-pdb_list_from = "plain_txt"
-# pdb_list_from = "rcsb"
+    # Determines where to get PDB screen codes from.
+    # Uncomment only one of the following lines. Tab-
+    # delim will source PDB codes from the first column
+    # of a tab delimited .txt file. Plain .txt will source
+    # from a txt file containing a list of PDB codes
+    # separated by newlines (\n). RCSB will look up the
+    # current list of all PDB codes and sort them
+    # alphabetically.
+    # pdb_list_from = "tab_delim"
+    pdb_list_from = "plain_txt"
+    # pdb_list_from = "rcsb"
 
-# File path to log file. This is where FindSpace writes
-# PDB codes of structures it has already searched, all
-# caps, separated by newlines (\n)
-log_fp = base_dir + "log/fs_log.txt"
+    # File path to log file. This is where FindSpace writes
+    # PDB codes of structures it has already searched, all
+    # caps, separated by newlines (\n)
+    log_fp = work_dir + "log/fs_log.txt"
 
-# Define the maximum number of structures to scan per run
-batch_max = 10
+    # Define the maximum number of structures to scan per run
+    batch_max = 10
 
-# Residues to ignore when computing steric hindrances,
-# Voronoi diagram, and convex hull. FindSpace will not
-# even bother reading these residues from the PDB file.
-ignore_res = ['HOH']
+    # Residues to ignore when computing steric hindrances,
+    # Voronoi diagram, and convex hull. FindSpace will not
+    # even bother reading these residues from the PDB file.
+    ignore_res = ['HOH']
 
-# Minimum and maximum allowed radius (in Angstroms) of pseudoatom voxels.
-vox_rad_lims = (0.5,3.)
+    # Minimum and maximum allowed radius (in Angstroms) of pseudoatom voxels.
+    vox_rad_lims = (0.5,3.)
 
-# Multiplier for minimum allowed voxel size. Excludes
-# pseudoatom voxels that are within bl_mult * VDW
-# radius of the nearest atom in the structure.
-bl_mult = 1.05
+    # Multiplier for minimum allowed voxel size. Excludes
+    # pseudoatom voxels that are within bl_mult * VDW
+    # radius of the nearest atom in the structure.
+    bl_mult = 1.05
 
-# Defines the minimum allowed distance between two voxels
-# when FindSpace is making voxels only at Voronoi vertices.
-# Defers to a minimum voxel distance of res when voxellating
-# along Voronoi ridges. In Angstroms.
-min_voxel_d = 1.5
+    # Defines the minimum allowed distance between two voxels
+    # when FindSpace is making voxels only at Voronoi vertices.
+    # Defers to a minimum voxel distance of res when voxellating
+    # along Voronoi ridges. In Angstroms.
+    min_voxel_d = 1.5
 
-# FindSpace will cut down on the number of pseudo Atom voxels
-# created by iteratively removing redundant voxels and
-# removing sterically interfering voxels. This sets a hard
-# ceiling for the number of iterations allowed.
-iter_max = 10
+    # FindSpace will cut down on the number of pseudo Atom voxels
+    # created by iteratively removing redundant voxels and
+    # removing sterically interfering voxels. This sets a hard
+    # ceiling for the number of iterations allowed.
+    iter_max = 10
 
-# Redundancy index. To remove redundant voxels, FindSpace
-# will cycle through all existing voxels and find other
-# voxels that are within red_idx * sum of voxel radii in Angstroms.
-# It groups these voxels and replaces them with a voxel
-# at the arithmetic mean.
-red_idx = 0.1
+    # Redundancy index. To remove redundant voxels, FindSpace
+    # will cycle through all existing voxels and find other
+    # voxels that are within red_idx * sum of voxel radii in Angstroms.
+    # It groups these voxels and replaces them with a voxel
+    # at the arithmetic mean.
+    red_idx = 0.1
 
-# Meshvoxel resolution. FindSpace renders void spaces as
-# meshvoxel points on the surface, and creates a 3D mesh
-# as a representation. meshvox_res determines the resolution
-# of this mesh representation. Note that higher values,
-# especially above 10, will generate more accurate meshes
-# but will be more computationally intensive. More accurate
-# meshes will give more accurate values for void space volume.
-meshvox_res = 12.
+    # Meshvoxel resolution. FindSpace renders void spaces as
+    # meshvoxel points on the surface, and creates a 3D mesh
+    # as a representation. meshvox_res determines the resolution
+    # of this mesh representation. Note that higher values,
+    # especially above 10, will generate more accurate meshes
+    # but will be more computationally intensive. More accurate
+    # meshes will give more accurate values for void space volume.
+    meshvox_res = 12.
 
-# Environment probe. FindSpace looks for residues in the vicinity
-# of each continuous void space. It will probe within env_probe
-# Angstroms of the void space.
-env_probe = 5.0
+    # Environment probe. FindSpace looks for residues in the vicinity
+    # of each continuous void space. It will probe within env_probe
+    # Angstroms of the void space.
+    env_probe = 5.0
 
-# Sets minimum void volume at which FindSpace will report
-# a void space. Set to a value just below the estimated
-# VDW volume of your ligand(s) of interest.
-min_void_vol = 100.
+    # Sets minimum void volume at which FindSpace will report
+    # a void space. Set to a value just below the estimated
+    # VDW volume of your ligand(s) of interest.
+    min_void_vol = 100.
 
-# Define van der Waals radii for relevant elements, in Angstroms.
-# If an atom's VDW is not listed here, X-finder will
-# default to 2 Angstroms.
-vdw = {
-    'H': 1.2,
-    'F': 1.5,
-    'CL': 1.9,
-    'Br': 1.97,
-    'I': 2.15,
-    'O': 1.58,
-    'S': 1.85,
-    'N': 1.64,
-    'C': 1.77,
-    'default': 2
-}
+    # Define van der Waals radii for relevant elements, in Angstroms.
+    # If an atom's VDW is not listed here, X-finder will
+    # default to 2 Angstroms.
+    vdw = {
+        'H': 1.2,
+        'F': 1.5,
+        'CL': 1.9,
+        'Br': 1.97,
+        'I': 2.15,
+        'O': 1.58,
+        'S': 1.85,
+        'N': 1.64,
+        'C': 1.77,
+        'default': 2
+    }
 
-# Package all user-defined parameters into a dictionary
-ud_params = {
-    "vdw": vdw,
-    "pdb_screen_list": pdb_screen_list,
-    "log_fp": log_fp,
-    "pdb_list_from": pdb_list_from,
-    "batch_max": batch_max,
-    "ignore_res": ignore_res,
-    "vox_rad_lims": vox_rad_lims,
-    "bl_mult": bl_mult,
-    "min_voxel_d": min_voxel_d,
-    "iter_max": iter_max,
-    "red_idx": red_idx,
-    "meshvox_res": meshvox_res,
-    "env_probe": env_probe,
-    "min_void_vol": min_void_vol
-}
+    # Package all user-defined parameters into a dictionary
+    return {
+        "vdw": vdw,
+        "pdb_screen_list": pdb_screen_list,
+        "log_fp": log_fp,
+        "pdb_list_from": pdb_list_from,
+        "batch_max": batch_max,
+        "ignore_res": ignore_res,
+        "vox_rad_lims": vox_rad_lims,
+        "bl_mult": bl_mult,
+        "min_voxel_d": min_voxel_d,
+        "iter_max": iter_max,
+        "red_idx": red_idx,
+        "meshvox_res": meshvox_res,
+        "env_probe": env_probe,
+        "min_void_vol": min_void_vol
+    }
+
+# end set_defaults
 
 
-def import_params():
-    '''
-    Import command line args to ud_params.
-    '''
-    pass
+def import_ud_params(defaults={}):
+    """Import command line args to ud_params."""
+
+    p = argparse.ArgumentParser()
+
+    p.add_argument("-w", "--work-dir",
+                   type=str,
+                   default="./",
+                   help="path to existing working directory")
+    p.add_argument("-s", "--scan-dir",
+                   help="absolute file path to scan directory",
+                   type=str,
+                   default='./scan')
+    p.add_argument("-o", "--out-dir",
+                   help="absolute file path to output directory",
+                   type=str,
+                   default='./out')
+    p.add_argument("-p", "--pdb-screen-list",
+                   help="absolute file path to pdb_screen_list",
+                   type=str,
+                   default='./pdb_screen_list.txt')
+    p.add_argument("--pdb-list-from",
+                   help="See docs in source (UD params)",
+                   type=str,
+                   choices=['plain_txt', 'tab_delim', 'rcsb'],
+                   default='plain_txt')
+    p.add_argument("-l", "--log-fp",
+                   help="absolute file path to log file",
+                   type=str,
+                   default='./log/fs_log.txt')
+    p.add_argument("--batch-max",
+                   help="maximum number of structures to process per run",
+                   type=int,
+                   default=10)
+
+    args = p.parse_args()
+    params = defaults.copy()
+    params.update(vars(args))
+    return params
+
 # end function import_params
 
 
-'''
-************** END USER-DEFINED PARAMETERS ***************
-'''
-
-
-def main_handler():
-    '''
+def main_handler(ud_params):
+    """
     Main handling function for find_space.py
-    '''
+    """
+
+    batch_max = ud_params['batch_max']
+    scan_dir = ud_params['scan_dir']
+    out_dir = ud_params['out_dir']
+    log_fp = ud_params['log_fp']
 
     # Define dictionary of PDB Struct objects
     struct_dict = {}
@@ -193,9 +232,9 @@ def main_handler():
         # in the search_log.txt file.
         Log = protpy.Scribe("./log/search_log.txt",pdb + "\n")
 
-        '''
+        """
         ********** LOAD PDB FILE ***********
-        '''
+        """
 
         # Create Struct object and store in temporary s placeholder
         s = VStruct(pdb,ud_params)
@@ -225,9 +264,9 @@ def main_handler():
         # Terminal.
         try:
 
-            '''
+            """
             ********** FIND VOID SPACES ***********
-            '''
+            """
 
             # Find pseudoatom voxels without steric interference and stitch
             # overlapping voxels together
@@ -237,9 +276,9 @@ def main_handler():
             envs = s.void_env(voids,atoms=prot_atoms,byres=True)
 
             # *******EDITED FOR DEV*******
-            '''
+            """
             ********** SORT VOID SPACES ***********
-            '''
+            """
 
             # Calculate the volumes of each void space
             vols = s.void_vol(voids)
@@ -258,9 +297,9 @@ def main_handler():
             vols = vols[big_enough]
             envs = envs[big_enough]
 
-            '''
+            """
             ********** WRITE VOIDS TO PDB ***********
-            '''
+            """
 
             # Double check to make sure there are the same
             # number of elements in voids and envs
@@ -341,10 +380,13 @@ def main_handler():
 # end function main_handler
 
 # __name__ == "pymol" if running from PyMol command GUI
-if __name__ in ("__main__","pymol"):
+if __name__ in ("__main__"):
+    defaults = set_defaults()
+    ud_params = import_ud_params(defaults)
 
-    parser = argparse.ArgumentParser()
-    import_params(parser)
-    main_handler()
+    from pprint import PrettyPrinter
+    pp = PrettyPrinter()
+    pp.pprint(ud_params)
 
+    main_handler(ud_params)
 # end if
