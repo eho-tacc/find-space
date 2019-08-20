@@ -50,9 +50,7 @@ ARG SRC="/opt/find-space/src"
 ARG WD="/home/work"
 RUN mkdir -p $SRC $WD && \
     cd $WD && \
-    mkdir -p out scan log && \
-    echo 1crn > pdb_screen_list.txt
+    mkdir -p out scan log
 COPY src $SRC
 
-#CMD "bash"
-CMD python3 /opt/find-space/src/find_space.py -w /home/work -p /home/work/pdb_screen_list.txt -l /home/work/log/fs_log.txt
+CMD ["python3", "/opt/find-space/src/find_space.py", "--print-params"]
