@@ -11,7 +11,6 @@ import argparse
 import protpy
 from protpy import geom
 from protpy.void import VStruct
-#from electrostatic_potential_solver import ElectrostaticPotentialSolver
 
 
 def set_defaults():
@@ -111,9 +110,9 @@ def set_defaults():
     probe within env_probe Angstroms of the void space."""
     env_probe = 5.0
 
-    helpdocs['min_void_vol'] = """Sets minimum void volume at which FindSpace will report
-    a void space. Set to a value just below the estimated
-    VDW volume of your ligand(s) of interest."""
+    helpdocs['min_void_vol'] = """Sets minimum void volume at which
+    FindSpace will report a void space. Set to a value just below the
+    estimated VDW volume of your ligand(s) of interest."""
     min_void_vol = 100.
 
     helpdocs['vdw'] = """Define van der Waals radii for relevant elements,
@@ -239,6 +238,9 @@ def import_ud_params(defaults):
                    please define from source (find_space.py line 122)""",
                    default="",
                    dest=None)
+    p.add_argument("--print-params",
+                   help="Print parameters to console before running",
+                   action="store_true")
 
     args = p.parse_args()
     # TODO: overwrite CLargs with JSON if provided
@@ -247,7 +249,12 @@ def import_ud_params(defaults):
     args.ignore_res = [x.strip().upper() for x in args.ignore_res.split(',')]
     # only use default value for vdw
     args.vdw = defaults['vdw']
-    #exit(1)
+
+    if args.print_params:
+        from pprint import PrettyPrinter
+        pp = PrettyPrinter()
+        print("Runtime parameters:\n")
+        pp.pprint(vars(args))
     return vars(args)
 
 # end function import_params
@@ -446,10 +453,5 @@ def main_handler(ud_params):
 if __name__ in ("__main__"):
     defaults = set_defaults()
     ud_params = import_ud_params(defaults)
-
-    from pprint import PrettyPrinter
-    pp = PrettyPrinter()
-    pp.pprint(ud_params)
-
-    #main_handler(ud_params)
+    main_handler(ud_params)
 # end if
