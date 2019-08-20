@@ -253,8 +253,9 @@ def import_ud_params(defaults):
     if args.print_params:
         from pprint import PrettyPrinter
         pp = PrettyPrinter()
-        print("Runtime parameters:\n")
+        print("Runtime parameters:")
         pp.pprint(vars(args))
+        print()
     return vars(args)
 
 # end function import_params
