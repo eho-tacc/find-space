@@ -14,7 +14,36 @@
   "shortDescription": "{{ app.description }}",
   "templatePath": "runner-template.sh",
   "testPath": "tester.sh",
-  "inputs": [],
+  "inputs": [
+    {
+      "id": "pdb_screen_list",
+      "value": {
+          "validator": "",
+          "visible": true,
+          "required": true,
+          "order": 0,
+          "enquote": false,
+          "default": "agave://data-tacc-work-eho/apps/find-space-0.1.2/test/testinput.txt"
+      },
+      "details": {
+          "label": "PDB screen list",
+          "description": "Text file containing list of PDB files to screen",
+          "argument": null,
+          "showArgument": false,
+          "repeatArgument": false
+      },
+      "semantics": {
+          "minCardinality": 1,
+          "maxCardinality": 1,
+          "ontology": [
+              "xsd:string"
+          ],
+          "fileTypes": [
+              "raw-0"
+          ]
+      }
+    }
+  ],
   "parameters": [{
     "id": "CONTAINER_IMAGE",
     "value": {
