@@ -26,9 +26,9 @@ if [ -z $FS_OUT_DIR ]; then FS_OUT_DIR="/home/work/out/"; fi
 if [ -z $FS_PDB_SCREEN_LIST ]; then FS_PDB_SCREEN_LIST="/home/work/pdb_screen_list.txt"; fi
 if [ -z $FS_LOG_FP ]; then FS_LOG_FP="/home/work/log/fs_log.txt"; fi
 
-cmd="python3 /opt/find-space/src/find_space.py --print-params " \
-"-w $(FS_WORK_DIR) -s $(FS_SCAN_DIR) -o $(FS_OUT_DIR) " \
-"-p $(FS_PDB_SCREEN_LIST) -l $(FS_LOG_FP)"
+# check if files exist
+
+cmd="python3 /opt/find-space/src/find_space.py --print-params -w $FS_WORK_DIR -s $FS_SCAN_DIR -o $FS_OUT_DIR -p $FS_PDB_SCREEN_LIST -l $FS_LOG_FP"
 
 echo DEBUG=1 container_exec ${CONTAINER_IMAGE} $cmd
 DEBUG=1 container_exec ${CONTAINER_IMAGE} $cmd
