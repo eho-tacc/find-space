@@ -1,8 +1,9 @@
 # To Do
 
-## Containerize
-
-* pip install protpy from Dockerfile
-* argparse all ud_params
-
 ## Appify
+
+* runner template:
+    * locally
+    * on wrangler
+    * on agave
+* add app.json inputs
