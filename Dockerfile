@@ -44,7 +44,7 @@ RUN pip3 install numpy \
                  cython
 
 # install ProtPy
-RUN pip3 install --index-url https://test.pypi.org/simple/ protpy
+RUN pip3 install --index-url https://test.pypi.org/simple/ protpy==0.1.1.post10
 
 ARG SRC="/opt/find-space/src"
 ARG WD="/home/work"
