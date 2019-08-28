@@ -3,10 +3,11 @@
   "version": "{{ app.version }}",
   "executionType": "HPC",
   "executionSystem": "hpc-tacc-wrangler-{{ agave.username }}",
-  "parallelism": "SERIAL",
+  "parallelism": "PARALLEL",
   "deploymentPath": "apps/{{ app.bundle }}",
   "deploymentSystem": "data-tacc-work-{{ agave.username }}",
-  "defaultProcessorsPerNode": 1,
+  "maxRunTime": "48:00:00",
+  "defaultProcessorsPerNode": 48,
   "defaultNodeCount": 1,
   "defaultQueue": "normal",
   "label": "{{ date_time.iso8601_micro }}",
@@ -23,7 +24,7 @@
           "required": true,
           "order": 0,
           "enquote": false,
-          "default": "agave://data-tacc-work-eho/apps/find-space-0.1.2/test/testinput.txt"
+          "default": "agave://data-tacc-work-eho/apps/find-space-0.1.2/testinput.txt"
       },
       "details": {
           "label": "PDB screen list",
@@ -44,7 +45,48 @@
       }
     }
   ],
-  "parameters": [{
+  "parameters": [
+    {
+      "id": "work_dir",
+      "value": {
+        "default": "work/",
+        "description": "path to working directory",
+        "type": "string",
+        "visible": true,
+        "required": true
+        }
+    },
+    {
+      "id": "scan_dir",
+      "value": {
+        "default": "work/scan/",
+        "description": "path to scan directory",
+        "type": "string",
+        "visible": true,
+        "required": true
+        }
+    },
+    {
+      "id": "out_dir",
+      "value": {
+        "default": "work/out/",
+        "description": "path to output directory",
+        "type": "string",
+        "visible": true,
+        "required": true
+        }
+    },
+    {
+      "id": "log_fp",
+      "value": {
+        "default": "work/log/fs_log.txt",
+        "description": "path to log of previously searched PDB codes",
+        "type": "string",
+        "visible": true,
+        "required": true
+        }
+    },
+    {
     "id": "CONTAINER_IMAGE",
     "value": {
       "default": "{{ docker.organization }}/{{ docker.repo }}:{{ docker.tag }}",

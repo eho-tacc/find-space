@@ -2,12 +2,16 @@
   "name": "eho-find-space test-1565984657",
   "appId": "eho-find-space-0.1.2",
   "archive": true,
-  "maxRunTime": "00:05:00",
+  "maxRunTime": "01:00:00",
   "archiveSystem": "data-tacc-work-eho",
   "archivePath": "archive/jobs/${JOB_NAME}-${JOB_ID}",
   "inputs": {
-    "pdb_screen_list": "agave://data-tacc-work-eho/apps/find-space-0.1.2/test/testinput.txt"
+    "pdb_screen_list": "agave://data-tacc-work-eho/apps/find-space-0.1.2/testinput.txt"
   },
   "parameters": {
+    "work_dir": "work/",
+    "scan_dir": "work/scan",
+    "out_dir": "work/out",
+    "log_fp": "work/log/fs_log.txt"
   }
 }

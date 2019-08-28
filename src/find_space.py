@@ -382,8 +382,8 @@ def main_handler(ud_params):
             # end if
 
             # User friendly
-            print("   main_handler - Writing void spaces " + \
-                  "to PDB files...")
+            print("   main_handler - Writing " + str(len(voids)) +
+                  " void spaces to PDB files...")
             write_bar = protpy.ProgressBar(len(voids))
 
             # Loop through all voids and associated envs

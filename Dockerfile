@@ -47,10 +47,6 @@ RUN pip3 install numpy \
 RUN pip3 install --index-url https://test.pypi.org/simple/ protpy==0.1.1.post10
 
 ARG SRC="/opt/find-space/src"
-ARG WD="/home/work"
-RUN mkdir -p $SRC $WD && \
-    cd $WD && \
-    mkdir -p out scan log
 COPY src $SRC
 
 CMD ["python3", "/opt/find-space/src/find_space.py", "--print-params"]
